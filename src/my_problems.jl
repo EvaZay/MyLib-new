@@ -2,17 +2,18 @@ abstract type AbstractMyProblem end
 
 mutable struct MyODEProblem{Method, FType, RType} <: AbstractMyProblem
     funcs::FType
-    x::Vector{Float64}
-    initial_conditions::Vector{Float64}
-    a_tol::Vector{Float64}
-    r_tol::Vector{Float64}
-    results::RType
+    x::Float64
+    # a_tol::Vector{Float64}
+    # r_tol::Vector{Float64}
+    results::Vector{Float64}
+    st::Float64
     coeffs1::Vector{Float64}
     coeffs2::Vector{Float64}
     coeffs3::Vector{Float64}
     coeffs4::Vector{Float64}
     coeffs5::Vector{Float64}
-    function MyODEProblem(funcs::Vector{<:Function}, method::String, x0::Real, initial_conditions::Vector{<:Real}, n::Int64)
+    cash::Vector{Float64}
+    function MyODEProblem(funcs::Vector{<:Function}, method::String, x0::Real, initial_conditions::Vector{<:Real}, st::Real)
         if method == "Euler"
             Method = :Euler
         end
@@ -29,14 +30,7 @@ mutable struct MyODEProblem{Method, FType, RType} <: AbstractMyProblem
             Method = :RungeKutta5
         end
 
-        x=zeros(Float64, n+1)
-        x[1]=x0
-
         N=length(funcs)
-        results = [zeros(Float64, n+1) for _ in 1:N]
-        for i=1:N
-            results[i][1]=initial_conditions[i]
-        end
 
         coeffs1=zeros(Float64, N)
         coeffs2=zeros(Float64, N)
@@ -44,14 +38,14 @@ mutable struct MyODEProblem{Method, FType, RType} <: AbstractMyProblem
         coeffs4=zeros(Float64, N)
         coeffs5=zeros(Float64, N)
 
-        a_tol=zeros(Float64, n)
+        # a_tol=zeros(Float64, n)
 
-        r_tol=zeros(Float64, n)
+        # r_tol=zeros(Float64, n)
         
-        new{Method, typeof(funcs), typeof(results)}(funcs, x, initial_conditions, a_tol, r_tol, results, coeffs1, coeffs2, coeffs3, coeffs4, coeffs5)
+        new{Method, typeof(funcs), typeof(initial_conditions)}(funcs, x0,  initial_conditions, st, coeffs1, coeffs2, coeffs3, coeffs4, coeffs5)
     end
 
-    function MyODEProblem(funcs::FType, method::String, x0::Real, initial_conditions::Real, n::Int64) where FType<:Function
+    function MyODEProblem(funcs::FType, method::String, x0::Real, initial_conditions::Real, st::Real) where FType<:Function
         if method == "Euler"
             Method = :Euler
         end
@@ -67,14 +61,6 @@ mutable struct MyODEProblem{Method, FType, RType} <: AbstractMyProblem
         if method == "Runge-Kutta 5"
             Method = :RungeKutta5
         end
-
-        x=zeros(Float64, n+1)
-        x[1]=x0
-
-        
-        results = [zeros(Float64, n+1)]
-        
-        results[1][1]=initial_conditions
         
         coeffs1=0
         coeffs2=0
@@ -82,11 +68,11 @@ mutable struct MyODEProblem{Method, FType, RType} <: AbstractMyProblem
         coeffs4=0
         coeffs5=0
 
-        a_tol=zeros(Float64, n)
+        # a_tol=zeros(Float64, n)
 
-        r_tol=zeros(Float64, n)
+        # r_tol=zeros(Float64, n)
         
-        new{Method, typeof([funcs]), typeof(results)}([funcs], x, [initial_conditions], a_tol, r_tol, results, [coeffs1],  [coeffs2], [coeffs3], [coeffs4], [coeffs5])
+        new{Method, typeof([funcs]), typeof(initial_conditions)}([funcs], x0, [initial_conditions], st, [coeffs1],  [coeffs2], [coeffs3], [coeffs4], [coeffs5])
     end
 end
 
